@@ -6,22 +6,61 @@ using System.Threading.Tasks;
 
 namespace Delegates
 {
-    class Math
+    public class Currency
     {
-        public int Sum(int x, int y)
+        public uint Dollars;
+        public ushort Cents;
+        public Currency(uint dollars, ushort cents)
         {
-            return x + y;
+            this.Dollars = dollars;
+            this.Cents = cents;
+        }
+        public override string ToString()
+        {
+            return string.Format("${0}.{1,-2:00}", Dollars, Cents);
+        }
+        public static string GetCurrencyUnit()
+        {
+            return "Doller";
+        }
+        public static explicit operator Currency(float value)
+        {
+            checked
+            {
+                uint dollars = (uint)value;
+                ushort cents = (ushort)((value - dollars) * 100);
+                return new Currency(dollars, cents);
+            }
+        }
+
+        public static implicit operator float(Currency value)
+        {
+            return value.Dollars + (value.Cents / 100.0f);
+        }
+        public static implicit operator Currency(uint value)
+        {
+            return new Currency(value, 0);
+        }
+        public static implicit operator uint(Currency value)
+        {
+            return value.Dollars;
         }
     }
     class Test
     {
-        public delegate int CalculationHandler(int x, int y);
+        public delegate string GetAString();
         static void Main(string[] args)
         {
-            Math math = new Math();
-            CalculationHandler sumHandler = new CalculationHandler(math.Sum);
-            int result = sumHandler(12, 25);
-            Console.WriteLine("Result is: " + result);
+            int x = 40;
+            GetAString fsm = x.ToString;
+            Console.WriteLine("String is {0}", fsm());
+            Currency balance = new Currency(34, 50);
+            fsm = balance.ToString;
+            Console.WriteLine("String is {0}", fsm());
+            fsm = new GetAString(Currency.GetCurrencyUnit);
+            Console.WriteLine("String is {0}", fsm());
+            Currency cur = (uint)55;
+            Console.WriteLine(cur.ToString());
             Console.ReadKey();
         }
     }
